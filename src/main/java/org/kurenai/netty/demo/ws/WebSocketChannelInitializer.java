@@ -2,6 +2,7 @@ package org.kurenai.netty.demo.ws;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -9,6 +10,12 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
 public class WebSocketChannelInitializer extends ChannelInitializer<SocketChannel> {
+
+    private final ChannelGroup group;
+
+    public WebSocketChannelInitializer(ChannelGroup group) {
+        this.group = group;
+    }
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
@@ -23,10 +30,11 @@ public class WebSocketChannelInitializer extends ChannelInitializer<SocketChanne
 
         //ws://server:port/context_path
         //ws://localhost:9999/ws
-        //参数指的是contex_path
+        //参数指的是context_path
+        pipeline.addLast(new HttpRequestHandler("/ws"));
         pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
         //websocket定义了传递数据的6中frame类型
-        pipeline.addLast(new TextWebSocketFrameHandler());
+        pipeline.addLast(new TextWebSocketFrameHandler(group));
 
     }
 }
